@@ -1,0 +1,197 @@
+---
+title: "[Luogu P3302] [SDOI2013]森林"
+date: 2019-03-07 03:34:51
+tags: "迁移"
+---
+<h1>题面</h1>
+<p><a href="https://www.luogu.org/problemnew/show/P3302" target="_blank"  rel="nofollow" >洛谷P3302</a></p>
+<hr />
+<h1>Solution</h1>
+<p>拿到这道题，我们不妨先想一下静态的树上K大怎么搞。<br />
+静态树上K大有两种办法，一是树链剖分+平衡树，二是主席树做链前缀和。前者的复杂度是$O(log^2n)$的，而后者只有$O(logn)$。</p>
+<p>我们考虑把数字全部离散化，然后开权值主席树，每颗主席树记录从它出发到根的路上每个数字出现了多少个。接下来，我们只需要找到LCA。因为数字出现个数满足可减性，因此，我们是可以“扣”出从这个点到LCA的路径的，我们把两条路径合并到一颗主席树上，做树上二分即可。</p>
+<p>接下来考虑如何处理边合并的问题。考虑启发式暴力合并。我们把小的那棵树合并到大的那棵树上，暴力重构小的那棵树的每个点的主席树，也暴力重构每个点的depth，fa来计算LCA即可。</p>
+<p>启发式合并中，每个点的重构次数期望为$logn$次，因此，我们的总复杂度为$O(nlog^2n)$</p>
+<p>就酱，这题我们就切掉啦(～￣▽￣)～</p>
+<hr />
+<h1>Code</h1>
+<p><strong>细节繁多，请各位dalao小心</strong></p>
+<pre><code class="language-cpp ">//Luogu P3302 [SDOI2013]森林
+//Mar,6th,2019
+//主席树启发式合并维护动态树树链K大
+#include&lt;iostream&gt;
+#include&lt;cstdio&gt;
+#include&lt;vector&gt;
+#include&lt;cstring&gt;
+#include&lt;algorithm&gt;
+using namespace std;
+long long read()
+{
+    long long x=0,f=1; char c=getchar();
+    while(!isdigit(c)){if(c=='-') f=-1;c=getchar();}
+    while(isdigit(c)){x=x*10+c-'0';c=getchar();}
+    return x*f;
+}
+const int N=80000+2000;
+struct SegmentTree
+{
+    #define mid ((now_l+now_r)&gt;&gt;1)
+    static const int M=400*N;
+    int son[M][2],size[M],to;
+    inline void update(int now)
+    {
+        size[now]+=size[son[now][0]]+size[son[now][1]];
+    }
+    inline void Add(int now,int pre,int x,int now_l,int now_r)
+    {
+        if(now_l==now_r)
+        {
+            size[now]=size[pre]+1;
+            return;
+        }
+        if(x&lt;=mid) 
+        {
+            Add(son[now][0]=++to,son[pre][0],x,now_l,mid);
+            son[now][1]=son[pre][1];
+        }
+        else
+        {
+            Add(son[now][1]=++to,son[pre][1],x,mid+1,now_r);
+            son[now][0]=son[pre][0];
+        }
+        update(now);
+    }
+    int Query(int now1,int now2,int pre1,int pre2,int x,int now_l,int now_r)
+    {
+        if(now_l==now_r) return now_l;
+        if(x&lt;=size[son[now1][0]]-size[son[pre1][0]]+size[son[now2][0]]-size[son[pre2][0]])
+            return Query(son[now1][0],son[now2][0],son[pre1][0],son[pre2][0],x,now_l,mid);
+        else
+            return Query(son[now1][1],son[now2][1],son[pre1][1],son[pre2][1],x-(size[son[now1][0]]-size[son[pre1][0]]+size[son[now2][0]]-size[son[pre2][0]]),mid+1,now_r);
+    }
+    void Print(int now,int now_l,int now_r)
+    {
+        cerr&lt;&lt;"no."&lt;&lt;now&lt;&lt;" l&amp;r:"&lt;&lt;now_l&lt;&lt;" "&lt;&lt;now_r&lt;&lt;" sonl&amp;r:"&lt;&lt;son[now][0]&lt;&lt;" "&lt;&lt;son[now][1]&lt;&lt;" size:"&lt;&lt;size[now]&lt;&lt;endl;
+        if(now_l!=now_r)
+            Print(son[now][0],now_l,mid),
+            Print(son[now][1],mid+1,now_r);
+    }
+    #undef mid
+}sgt;
+vector &lt;int&gt; e[N];
+int n,m,q,w[N],mmap[N];//mmap:离散值-&gt;真实值
+int fa[N][21],size[N],depth[N],root[N];
+bool vis[N];
+void dfs(int now)
+{
+    for(int i=1;i&lt;=20;i++)
+        fa[now][i]=fa[fa[now][i-1]][i-1];
+    vis[now]=true;
+    for(int i=0;i&lt;int(e[now].size());i++)
+        if(vis[e[now][i]]==false)
+        {
+            depth[e[now][i]]=depth[now]+1;
+            fa[e[now][i]][0]=now;
+            root[e[now][i]]=++sgt.to;
+            sgt.Add(root[e[now][i]],root[now],w[e[now][i]],1,m);
+            //sgt.Print(root[e[now][i]],1,m);
+            //cerr&lt;&lt;endl;
+            dfs(e[now][i]);
+        }
+    vis[now]=false;
+}
+void Merge(int x,int y)
+{
+    if(size[fa[x][20]]&gt;size[fa[y][20]]) swap(x,y);
+    size[fa[y][20]]+=size[fa[x][20]];
+    depth[x]=depth[y]+1;
+    fa[x][0]=y;
+    root[x]=++sgt.to;
+    sgt.Add(root[x],root[y],w[x],1,m);
+    //sgt.Print(root[x],1,m);
+    //cerr&lt;&lt;endl;
+    dfs(x);
+    e[x].push_back(y);
+    e[y].push_back(x);
+}
+int LCA(int x,int y)
+{
+    if(depth[x]&lt;depth[y]) swap(x,y);
+    for(int i=20;i&gt;=0;i--)
+        if(depth[fa[x][i]]&gt;=depth[y])
+            x=fa[x][i];
+    if(x==y) return x;
+    for(int i=20;i&gt;=0;i--)
+        if(fa[x][i]!=fa[y][i])
+            x=fa[x][i],y=fa[y][i];
+    return fa[x][0];
+}
+int Query(int x,int y,int K)
+{
+    if(depth[x]&lt;depth[y]) swap(x,y);
+    int lca=LCA(x,y);
+    if(lca==y)
+        return mmap[sgt.Query(root[x],0,(fa[lca][0]==lca?0:root[fa[lca][0]]),0,K,1,m)];
+    else
+        return mmap[sgt.Query(root[x],root[y],root[lca],(fa[lca][0]==lca?0:root[fa[lca][0]]),K,1,m)];
+}
+void Init()
+{
+    for(int i=0;i&lt;=n;i++)
+        e[i].reserve(4);
+    for(int i=1;i&lt;=n;i++)
+    {
+        root[i]=++sgt.to;
+        sgt.Add(root[i],0,w[i],1,m);
+    }
+    for(int i=1;i&lt;=n;i++)
+        size[i]=1,depth[i]=1;
+    for(int i=1;i&lt;=n;i++)
+        for(int j=0;j&lt;=21;j++)
+            fa[i][j]=i;
+}
+int m2;
+int main()
+{
+    static int tmp[N];
+    n=read(),n=read(),m2=read(),q=read();
+    for(int i=1;i&lt;=n;i++)
+        tmp[i]=w[i]=read();
+
+    sort(tmp+1,tmp+1+n);
+    m=unique(tmp+1,tmp+1+n)-tmp-1;
+    for(int i=1;i&lt;=n;i++)
+    {
+        int temp=lower_bound(tmp+1,tmp+1+m,w[i])-tmp;
+        mmap[temp]=w[i];
+        w[i]=temp;
+    }
+    Init();
+
+    for(int i=1;i&lt;=m2;i++)
+    {
+        int x=read(),y=read();
+        Merge(x,y);
+    }
+
+    int ans=0;
+    char OP[5];
+    for(int i=1;i&lt;=q;i++)
+    {
+        scanf("%s",OP+1);
+        if(OP[1]=='Q')
+        {
+            int x=read()^ans,y=read()^ans,K=read()^ans;
+            printf("%d\n",ans=Query(x,y,K));
+        }
+        else
+        {
+            int x=read()^ans,y=read()^ans;
+            Merge(x,y);
+        }
+        //ans=0;
+    }
+    return 0;
+}
+
+</code></pre>
