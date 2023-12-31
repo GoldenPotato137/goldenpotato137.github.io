@@ -3,13 +3,14 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Hexo
+title: GoldenPotato137的小屋
 subtitle: ''
 description: 'GoldenPotato137的个人博客，主要记录了自己的一些开发与学习记录、旧有的OI知识点。'
 keywords:
-author: John Doe
-language: en
+author: GoldenPotato137
+language: zh-CN
 timezone: ''
+favicon: https://cdn.jsdelivr.net/gh/goldenpotato137/potatovn/GalgameManager/Assets/Potato.scale-100.png
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
