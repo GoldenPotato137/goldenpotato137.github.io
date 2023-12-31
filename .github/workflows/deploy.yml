@@ -1,47 +1,85 @@
 name: Deploy
 
 on:
- push:
-  branches:
-    - master
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
- build:
-  runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-  steps:
-    - name: Checkout Repository master branch
-      uses: actions/checkout@master
+    steps:
+      - name: Checkout Repository master branch
+        uses: actions/checkout@master
 
-    - name: Setup Node.js 10.x
-      uses: actions/setup-node@master
-      with:
-        node-version: 16
+      - name: Setup Node.js 10.x
+        uses: actions/setup-node@master
+        with:
+          node-version: 16
 
-    - name: Setup Hexo Dependencies
-      run: |
-        cd ./src
-        npm install hexo-cli -g
-        npm install
+      - name: Setup Hexo Dependencies
+        run: |
+          cd ./src
+          npm install hexo-cli -g
+          npm install
 
-    - name: Setup Deploy Private Key
-      env:
-        HEXO_DEPLOY_PRIVATE_KEY: ${{ secrets.DEPLOY_KEY }}
-      run: |
-        sudo timedatectl set-timezone "Asia/Shanghai"
-        mkdir -p ~/.ssh/
-        echo "$HEXO_DEPLOY_PRIVATE_KEY" > ~/.ssh/id_rsa 
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan github.com >> ~/.ssh/known_hosts
+      - name: Setup Deploy Private Key
+        env:
+          HEXO_DEPLOY_PRIVATE_KEY: ${{ secrets.DEPLOY_KEY }}
+        run: |
+          sudo timedatectl set-timezone "Asia/Shanghai"
+          mkdir -p ~/.ssh/
+          echo "$HEXO_DEPLOY_PRIVATE_KEY" > ~/.ssh/id_rsa 
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-    - name: Setup Git Infomation
-      run: |
-        git --version
-        git config --global user.name 'action@github.com' 
-        git config --global user.email 'GitHub Action'
-    - name: Deploy Hexo
-      run: |
-        cd ./src
-        hexo clean
-        hexo generate 
-        hexo deploy
+      - name: Setup Git Infomation
+        run: |
+          git --version
+          git config --global user.name 'action@github.com' 
+          git config --global user.email 'GitHub Action'
+      - name: Deploy Hexo
+        run: |
+          cd ./src
+          hexo clean
+          hexo generate 
+          hexo deploy
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout Repository gh-pages branch
+        uses: actions/checkout@master
+        with: 
+          ref: 'gh-pages'
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload entire repository
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
