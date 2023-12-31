@@ -5,7 +5,7 @@
 # Site
 title: Hexo
 subtitle: ''
-description: ''
+description: 'GoldenPotato137的个人博客，主要记录了自己的一些开发与学习记录、旧有的OI知识点。'
 keywords:
 author: John Doe
 language: en
@@ -13,7 +13,7 @@ timezone: ''
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
-url: https://goldenpotato137.github.io/project
+url: https://goldenpotato137.github.io/
 permalink: :year/:month/:day/:title/
 permalink_defaults:
 pretty_urls:
