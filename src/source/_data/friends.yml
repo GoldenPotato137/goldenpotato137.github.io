@@ -1,0 +1,38 @@
+- group: '友情链接'
+  description: 
+  items:
+    - title: lizbaka的博客
+      avatar: https://lizbaka.moe/img/avatar.png
+      url: https://lizbaka.moe
+      screenshot: # 截图
+      keywords: # 关键词
+      description: Let’s make this world better!
+
+    - title: Bubbleioa
+      avatar: https://bubbleioa.top/wp-content/uploads/2018/10/63738985_p0-2.jpg
+      url: https://bubbleioa.top/
+      screenshot: # 截图
+      keywords: # 关键词
+      description: # 描述
+    
+    - title: Von Brank
+      avatar: https://vonbrank-images.oss-cn-hangzhou.aliyuncs.com/20230826-Blog-Image/system/vonbrank-github-profile.jpg
+      url: https://vonbrank.github.io/
+      screenshot: # 截图
+      keywords: # 关键词
+      description: Empowering the Best
+
+    - title: Yukkoの部屋
+      avatar: https://s3.bmp.ovh/imgs/2024/01/01/de213132ae95ff28.jpg
+      url: https://yukkodesu.github.io/
+      screenshot: # 截图
+      keywords: # 关键词
+      description: Keep Learning
+
+    - title: ComputerEngine
+      avatar: https://s3.bmp.ovh/imgs/2024/01/01/93099301d824808d.jpg
+      url: https://www.cnblogs.com/ComputerEngine/
+      screenshot: # 截图
+      keywords: # 关键词
+      description: 
+
