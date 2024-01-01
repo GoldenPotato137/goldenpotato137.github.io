@@ -99,5 +99,4 @@ jobs:
           ssh-keyscan s.potatox.moe >> ~/.ssh/known_hosts
       
       - name: Deploy
-        run: |
-          ssh goldenpotato@s.potatox.moe "cd /var/www/blog && git fetch --all && git reset --hard origin/gh-pages"
+        run: ssh goldenpotato@s.potatox.moe "cd /var/www/blog && git fetch --all && git reset --hard origin/gh-pages"
