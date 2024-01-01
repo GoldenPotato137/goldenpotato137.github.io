@@ -88,11 +88,6 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository gh-pages branch
-        uses: actions/checkout@master
-        with: 
-          ref: 'gh-pages'
-      
       - name: Setup Private Key
         env:
           PRIVATE_KEY: ${{ secrets.DEPLOY_KEY }}
@@ -107,6 +102,6 @@ jobs:
         run: |
           ssh goldenpotato@s.potatox.moe 
           "
-          cd /var/www/blog;
+          cd /var/www/blog &&
           git pull;
           "
