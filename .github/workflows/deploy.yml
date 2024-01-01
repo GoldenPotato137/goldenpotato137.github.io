@@ -83,3 +83,30 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+  
+  deploy-to-my-server:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository gh-pages branch
+        uses: actions/checkout@master
+        with: 
+          ref: 'gh-pages'
+      
+      - name: Setup Private Key
+        env:
+          PRIVATE_KEY: ${{ secrets.DEPLOY_KEY }}
+        run: |
+          sudo timedatectl set-timezone "Asia/Shanghai"
+          mkdir -p ~/.ssh/
+          echo "$PRIVATE_KEY" > ~/.ssh/id_rsa 
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan s.potatox.moe >> ~/.ssh/known_hosts
+      
+      - name: Deploy
+        run: |
+          ssh goldenpotato@s.potatox.moe 
+          "
+          cd /var/www/blog;
+          git pull;
+          "
