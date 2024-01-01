@@ -105,3 +105,7 @@ deploy:
   type: 'git' 
   repo: git@github.com:GoldenPotato137/goldenpotato137.github.io.git
   branch: gh-pages
+
+math:
+  mathjax:
+    enable: true
