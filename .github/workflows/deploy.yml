@@ -100,9 +100,4 @@ jobs:
       
       - name: Deploy
         run: |
-          ssh goldenpotato@s.potatox.moe 
-          "
-          cd /var/www/blog &&
-          git fetch --all &&
-          git reset --hard origin/gh-pages
-          "
+          ssh goldenpotato@s.potatox.moe "cd /var/www/blog && git fetch --all && git reset --hard origin/gh-pages"
