@@ -103,5 +103,6 @@ jobs:
           ssh goldenpotato@s.potatox.moe 
           "
           cd /var/www/blog &&
-          git pull;
+          git fetch --all &&
+          git reset --hard origin/gh-pages
           "
