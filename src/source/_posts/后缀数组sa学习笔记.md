@@ -8,6 +8,8 @@ categories:
   - - 后缀数组
   - - 字符串
 date: 2019-03-06 11:06:37
+plugins:
+  - mathjax
 ---
 
 ## 为什么要学后缀数组
