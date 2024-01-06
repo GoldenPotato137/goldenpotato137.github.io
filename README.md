@@ -4,7 +4,7 @@
 
 这个博客是使用hexo搭建的，你可以在`./src`里面找到网站的源代码。
 
-网站目前部署在[github page](goldenpotato137.github.io)（作为备份）与[我的服务器](goldenpotato.cn)上
+网站目前部署在[github page](https://goldenpotato137.github.io)（作为备份）与[我的服务器](https://goldenpotato.cn)上
 
 你可以在`.github/workflows/deploy.yml`里面找到自动部署相关的github action
 
