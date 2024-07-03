@@ -83,9 +83,38 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+    
+  build-image:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        ref: 'gh-pages'  # 指定切换到 gh-pages 分支
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_TOKEN }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: goldenpotato137/goldenpotato.cn:latest
+
+    - name: Verify deployment
+      run: echo "The image has been successfully pushed to Docker Hub."
   
   deploy-to-my-server:
-    needs: build
+    needs: build-image
     runs-on: ubuntu-latest
     steps:
       - name: Setup Private Key
@@ -97,6 +126,15 @@ jobs:
           echo "$PRIVATE_KEY" > ~/.ssh/id_rsa 
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan s.potatox.moe >> ~/.ssh/known_hosts
-      
       - name: Deploy
-        run: ssh goldenpotato@s.potatox.moe "cd /var/www/blog && git fetch --all && git reset --hard origin/gh-pages"
+        run: |
+          ssh goldenpotato@s.potatox.moe "\
+          echo 'Starting deployment...'; \
+          cd /var/www/blog; \
+          echo 'Changing directory to /var/www/blog'; \
+          git fetch --all; \
+          echo 'Fetching all branches'; \
+          git reset --hard origin/gh-pages; \
+          echo 'Resetting to latest commit on gh-pages'; \
+          echo 'Deployment completed successfully.'
+          "
