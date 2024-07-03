@@ -130,11 +130,13 @@ jobs:
         run: |
           ssh goldenpotato@s.potatox.moe "\
           echo 'Starting deployment...'; \
-          cd /var/www/blog; \
-          echo 'Changing directory to /var/www/blog'; \
-          git fetch --all; \
-          echo 'Fetching all branches'; \
-          git reset --hard origin/gh-pages; \
-          echo 'Resetting to latest commit on gh-pages'; \
-          echo 'Deployment completed successfully.'
+          echo 'Pull new image...'; \
+          docker pull goldenpotato137/goldenpotato.cn:latest; \
+          echo 'Stop old container...'; \
+          docker stop goldenpotato.cn; \
+          echo 'Remove old container...'; \
+          docker rm goldenpotato.cn; \
+          echo 'Run new container...'; \
+          docker run -d --name goldenpotato.cn -p 9001:80 goldenpotato137/goldenpotato.cn:latest; \
+          echo 'Deployment completed.'; \
           "
