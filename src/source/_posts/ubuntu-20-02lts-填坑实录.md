@@ -12,3 +12,5 @@ date: 2021-02-25 22:44:43
 **3.cudnn安装** https://blog.csdn.net/weixin\_44002829/article/details/111500287
 
 > 注：在运行demon前需安装freeimage库 sudo apt-get install libfreeimage3 libfreeimage-dev
+>
+> 4. cli连接wifi: https://ubuntu.com/core/docs/networkmanager/configure-wifi-connections
