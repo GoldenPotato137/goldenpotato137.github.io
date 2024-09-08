@@ -38,3 +38,12 @@ $$\sum_j \sum_i k_{ij} \cdot (2^{j-1} \cdot P_i)$$
 ### 有限域计算优化
 
 不只是运用SM上的整数计算单元，把浮点计算单元也利用上以共同执行大整数计算。
+
+## Load-Balanced Parallel Implementation on GPUs for Multi-Scalar Multiplication Algorithm
+> 2024 - 3
+
+### 朴素方法分析
+#### double-and-add方法
+![picture 0](http://img.goldenpotato.cn/ecc337c43b931afebb12a49d4f57cb528e9adaa72e6ac53110b504d2f65b8aaf.png)  
+
+需要计算$n\lambda$次PADD与$\lambda -1$次PDBL，其中$\lambda$为椭圆曲线群所在的有限域阶数的二进制位数。
