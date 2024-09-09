@@ -47,3 +47,29 @@ $$\sum_j \sum_i k_{ij} \cdot (2^{j-1} \cdot P_i)$$
 ![picture 0](http://img.goldenpotato.cn/ecc337c43b931afebb12a49d4f57cb528e9adaa72e6ac53110b504d2f65b8aaf.png)  
 
 需要计算$n\lambda$次PADD与$\lambda -1$次PDBL，其中$\lambda$为椭圆曲线群所在的有限域阶数的二进制位数。
+#### Pippenger
+$\lceil \frac{\lambda}{c} \rceil (n + 2^{c+1} - 3)$次PADD及$c(\lceil \frac{\lambda}{c} \rceil - 1)$次PDBL，其中$c$为窗口位数。
+
+### 并行化方法
+#### 点合并阶段
+每个block处理一个窗口（pippenger子问题），每个thread处理固定范围的连续点：$\left[threadid \cdot \lceil n / N \rceil,  (threadid + 1) \cdot \lceil n / N \rceil \right)$。计算完的结果会被存放到一个不会冲突的全局内存中（下解释）
+
+![picture 6](http://img.goldenpotato.cn/d39c734e587f1418a71c69c9be69b4e2412f09f4e540f54b534e0f5e84c37026.png)  
+
+
+考虑到不同的标量可能会跨过每个线程分管的范围，若所有线程直接公用同一个global memory存放结果，势必会造成冲突：如上图所示($a_i$表示标量(pippenger分块过后的))，线程0和线程1均分别计算了标量为1的部分桶。文章分配了一个较大的全局内存并采用了一种偏移机制来避免这个问题。
+
+$$offset_{tid} = tid + min\left\{ \left\lceil \frac{a_i + 1}{2} \right\rceil \right\}$$
+
+式中，$tid$为线程id，$offset_{tid}$表示每个线程写bukkit位置的起始偏移量。显然对于某个线程，前面至少有$tid$个结果。后者考虑最坏情况下每个线程都是满的（aka每个标量都独自出现），原文用了一些标量变换的方法使得标量只有奇数的，故需要除以2后上取整。
+
+记录下每个位置上放了什么bukkit，这个数组必然是单调递增的，可以采用二分查找的方法把分处于不同缓存区域的bukkit给加起来。
+
+#### 桶累积阶段
+
+
+### 标量变换&预计算
+原先每个$k_{i,j} \in [0, 2^c - 1]$，考虑到椭圆曲线上取反操作廉价，将原先的$k_{i,j}$变为有符号数$k'_{i,j} \in [- 2^{c-1} -1, 2^{c-1} -1]$，将大于等于$2^{c-1}$的标量变为负数，并将对应$P$取反。
+
+### PADD优化
+![picture 5](http://img.goldenpotato.cn/ff7e16afe8bcf3512ccae62d054409e3ee293e361c35aece75f1d47eb807ba5b.png)  
