@@ -64,7 +64,7 @@ $\lceil \frac{\lambda}{c} \rceil (n + 2^{c+1} - 3)$次PADD及$c(\lceil \frac{\la
 
 考虑到不同的标量可能会跨过每个线程分管的范围，若所有线程直接公用同一个global memory存放结果，势必会造成冲突：如上图所示($a_i$表示标量(pippenger分块过后的))，线程0和线程1均分别计算了标量为1的部分桶。文章分配了一个较大的全局内存并采用了一种偏移机制来避免这个问题。
 
-$offset_{tid} = tid + min\left\{ \left\lceil \frac{a_i + 1}{2} \right\rceil \right\}$
+$$offset_{tid} = tid + min\left[ \left\lceil \frac{a_i + 1}{2} \right\rceil \right]$$
 
 式中，$tid$为线程id，$offset_{tid}$表示每个线程写bukkit位置的起始偏移量。显然对于某个线程，前面至少有$tid$个结果。后者考虑最坏情况下每个线程都是满的（aka每个标量都独自出现），原文用了一些标量变换的方法使得标量只有奇数的，故需要除以2后上取整。
 
