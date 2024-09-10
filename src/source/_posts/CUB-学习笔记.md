@@ -96,6 +96,7 @@ CUB方法分为四层，分别是thread级、warp级、block级与device级。�
 
 ### CUB 基本知识
 + 所有CUB方法都是按照模板类来提供的，例如block级的reduce方法：
+  
 ```cpp
 template<typename T, int BLOCK_DIM_X, BlockReduceAlgorithm ALGORITHM = BLOCK_REDUCE_WARP_REDUCTIONS, int BLOCK_DIM_Y = 1, int BLOCK_DIM_Z = 1, int LEGACY_PTX_ARCH = 0>
 class BlockReduce
@@ -116,7 +117,7 @@ __global__ void ExampleKernel(...)
 
     // Compute the block-wide max for thread0
     int aggregate = BlockReduce(temp_storage).Reduce(thread_data, cub::Max());
-```       
+```
 
 + 方法（block级、warp级）都需要临时的shared变量（该变量会用一个struct打包所有需要的临时值，可以用 `方法类名::TempStorage`获取该方法所需的临时变量的struct）
 
