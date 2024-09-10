@@ -7,6 +7,7 @@ categories:
   - - 动态规划
   - - 状压DP
 date: 2019-02-22 17:21:20
+updated: 2019-02-22 17:21:20
 ---
 
 题面：[洛谷](https://www.luogu.org/problemnew/show/P2831)

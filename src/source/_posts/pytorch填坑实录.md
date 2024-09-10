@@ -5,6 +5,7 @@ id: '495'
 categories:
   - - 深度学习
 date: 2021-03-14 19:51:10
+updated: 2021-03-14 19:51:10
 ---
 
 1.  pytorch: grad can be implicitly created only for scalar outputs:

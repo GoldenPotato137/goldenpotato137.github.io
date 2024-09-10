@@ -10,6 +10,7 @@ categories:
   - - 网络最大流
   - - 网络流
 date: 2019-02-12 18:19:16
+updated: 2019-02-12 18:19:16
 ---
 
 **传送门：[洛谷](https://www.luogu.org/problemnew/show/P2891)**

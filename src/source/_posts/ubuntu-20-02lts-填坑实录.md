@@ -5,6 +5,7 @@ id: '492'
 categories:
   - - uncategorized
 date: 2021-02-25 22:44:43
+updated: 2021-02-25 22:44:43
 ---
 
 **1.Ubuntu启动时如何显示或隐藏启动消息？** https://qastack.cn/ubuntu/248/how-can-i-show-or-hide-boot-messages-when-ubuntu-starts 
