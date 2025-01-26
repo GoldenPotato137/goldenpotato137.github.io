@@ -46,3 +46,14 @@ int main()
 ```shell
 sudo lsof -i :8080
 ```
+
+**赋予promtail docker用户访问/var/log/caddy/.log的权限**
+
+1. 为日志文件添加对其他用户 (o) 的读权限：  
+   ```bash
+   chmod o+r /var/log/caddy/*.log
+   ```
+2. 或者使用 ACL（Access Control List）让 UID 10001（容器中的 loki 用户）有读权限：  
+   ```bash
+   setfacl -m u:10001:r /var/log/caddy/*.log
+   ```
