@@ -115,7 +115,7 @@ sudo lxd init
 
 ```bash
 Would you like to use LXD clustering? (yes/no) [default=no]: yes  #是否要启用集群，yes
-What IP address or DNS name should be used to reach this server? [default=100.64.0.14]: 4080-2 # 这里填入要访问这台机器控制端api的域名或ip，我们组的机器使用headscale虚拟局域网，这里填入的是magic dns名。对于普通情况下，填入内网ip即可
+What IP address or DNS name should be used to reach this server? [default=100.64.0.14]:   100.64.0.14 # 这里填入要访问这台机器控制端api的域名或ip，对于普通情况下，填入内网ip即可
 Are you joining an existing cluster? (yes/no) [default=no]: no
 What member name should be used to identify this server in the cluster? [default=4080-2]:
 Do you want to configure a new local storage pool? (yes/no) [default=yes]:
@@ -142,8 +142,78 @@ lxc config set core.trust_password 你的密码
 
 类似的，输入`sudo lxd init`进入交互式配置
 
+以下以我的交互为例：
+```bash
+Would you like to use LXD clustering? (yes/no) [default=no]: yes
+What IP address or DNS name should be used to reach this server? [default=172.17.0.1]: 100.64.0.15 #同上，一般填这台机器的内网地址
+Are you joining an existing cluster? (yes/no) [default=no]: yes
+Do you have a join token? (yes/no/[token]) [default=no]: no
+What member name should be used to identify this server in the cluster? [default=ubuntu]: 3080-2
+IP address or FQDN of an existing cluster member (may include port): 100.64.0.14 #这里填一号节点刚刚填入的访问地址
+Cluster fingerprint: fb04d9240aef4ce4dc0137afc50fc2bbe29dbaca1d9c587b42882d21400c07bb
+You can validate this fingerprint by running "lxc info" locally on an existing cluster member.
+Is this the correct fingerprint? (yes/no/[fingerprint]) [default=no]: yes
+Cluster trust password:
+All existing data is lost when joining a cluster, continue? (yes/no) [default=no] yes
+Choose "size" property for storage pool "local":
+Choose "source" property for storage pool "local":
+Choose "zfs.pool_name" property for storage pool "local":
+Would you like a YAML "lxd init" preseed to be printed? (yes/no) [default=no]:
+```
 
-### 配置共享目录
+### 使用你的LXD集群
+
+到此，我们集群就算配置好啦 *★,°*:.☆(￣▽￣)/$:*.°★* 。
+
+接下来我们需要配置一个容器模板（或者说如果你喜欢直接用最原生态的什么都没装的容器（比如说原版ubuntu-server）并直接分发给组员，倒也不是不行（逃）
+
+首先，创建一个基于原版ubuntu server的容器，版本以24.04为例：
+```bash
+# 以下命令在任意LXD节点执行均可，LXD集群的最大魅力就是一处配置处处同步
+# 启动一个基于ubuntu 24.04的容器，容器名为template，在名为node1的宿主机上启动（不填这个--target node1也行，会自动选一个最合适的宿主机）
+sudo lxc launch ubuntu:24.04 template --target node1
+
+# 进入容器（使用刚刚创建的template容器的bash）
+sudo lxc exec template bash
+```
+
+输入完上述命令后会进入容器`template`的bash，接下来是配置这个容器的环节，之后这个容器会被导出成镜像作为新容器的创建模板，按照你的喜好来做即可
+
+以下为我的操作，仅供参考
+```bash
+timedatectl set-timezone Asia/Shanghai # 修改时区
+apt update && apt install ssh openssh-server #安装ssh-server
+# 在我的实践中，发现这样安装的ssh会被cloud init设置为不允许密码登录，需要手动取消。在我这里，这个设置的文件是etc/ssh/sshd_config.d/60-cloudimg-settings.conf，把里面的PasswordAuthentication no 去掉即可
+nano /etc/ssh/sshd_config.d/60-cloudimg-settings.conf
+
+# 安装显卡驱动
+wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb
+dpkg -i cuda-keyring_1.1-1_all.deb
+apt-get update
+apt-get install -y nvidia-open-570 #显卡驱动版本要和宿主机一模一样，注意调整这里的版本号
+
+reboot #重启容器让驱动生效
+nvidia-smi #检查驱动是否生效
+# 重新连接容器，在任意宿主机上输入：sudo lxc exec template bash
+
+apt-get -y install cuda-toolkit-12-8 # 安装cuda
+adduser user # 创建一个新用户给之后别人使用（或者直接用root也行）
+usermod -G sudo user # 赋予管理员权限（在容器内别人爱怎么搞都没事）
+nano /home/user/.bashrc # 往bashrc里写cuda的地址，具体怎么搞就不在这篇文章中赘述了
+```
+
+完成模板容器配置后，在任意节点输入
+```bash
+lxc stop template #停止刚刚修改的容器
+lxc publish template --alias templateName --public #把刚刚的容器打包成一个名为templateName的模板发布
+```
+这些模板是跨节点的，可以在任意节点使用，要分配容器时，只需：
+```bash
+sudo lxc launch templateName containerName --target node1 #在节点node1上使用templateName模板启动一个名为containerName的容器
+```
+找到容器ip（看路由器/`lxc list`找均可），把这个ip（以及创建的默认账户密码）告诉你的师门，搞定~
+
+### 配置共享目录 （选做）
 
 有的时候部分数据是需要跨容器共享的，需要在宿主机上划分一个目录以供各个容器挂载并共享。如果你没有多容器（同一台宿主机上的，若需要跨宿主机共享一些存储，可以考虑进一步的网络数据盘方案）共享目录的需求，可以跳过本小节。
 
